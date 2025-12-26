@@ -1,0 +1,39 @@
+
+HEART DISEASE PREDICTION - EXPERIMENT SUMMARY
+============================================================
+Generated: 2025-12-26 06:49:44.595963
+
+PROJECT INFO:
+- Project: Heart Disease Prediction
+- Mode: Local Workaround (No Google Drive)
+- Location: /content/heart-disease-prediction/
+
+DATA SUMMARY:
+- Training samples: 736
+- Test samples: 184
+- Features: 13
+- Target distribution (train): {1: 407, 0: 329}
+
+MODEL PERFORMANCE:
+- Model: Logistic Regression
+- Accuracy: 83.15%
+- ROC-AUC: 0.9110
+- Parameters: C=0.1, solver=liblinear
+
+FILES GENERATED:
+1. Raw data: /content/heart-disease-prediction/data/01_raw/
+2. Processed data: /content/heart-disease-prediction/data/02_processed/processed_data.csv
+3. Train/test splits: /content/heart-disease-prediction/data/03_model_input/
+4. Model: /content/heart-disease-prediction/models/heart_disease_model.joblib
+5. MLflow logs: /content/heart-disease-prediction/mlruns/
+6. Figures: /content/heart-disease-prediction/reports/figures/
+
+DOWNLOAD INSTRUCTIONS:
+1. Run the download function below
+2. Or manually download from Files sidebar in Colab
+3. Extract and open in VS Code
+
+NOTES:
+- This is a fail-proof local save workaround
+- No browser pop-ups or Google Drive auth required
+- All files are preserved until Colab runtime ends
