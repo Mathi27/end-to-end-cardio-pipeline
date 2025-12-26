@@ -27,23 +27,27 @@ Data Aggregation: Merges 4 datasets to increase sample size from 303 (standard) 
 4. Language: Python 3.10
 
 5. Testing: Pytest & Flake8
-`
-├── .github/workflows/ # CI/CD Configuration (YAML)
-├── data/              # Raw and processed datasets
-│   ├── 01_raw/        # Original UCI files
-│   ├── 02_processed/  # Merged & Cleaned CSV
-│   └── 03_model_input/# Train/Test split CSVs
-├── mlruns/            # Local MLflow logs (Metrics & Artifacts)
-├── notebooks/         # Modular Notebooks
+
+```
+├── .github/
+│   └── workflows/              # CI/CD configuration (YAML)
+├── data/
+│   ├── 01_raw/                 # Original UCI files
+│   ├── 02_processed/           # Merged & cleaned CSVs
+│   └── 03_model_input/         # Train/Test split CSVs
+├── mlruns/                     # Local MLflow logs (metrics & artifacts)
+├── notebooks/
 │   ├── 01_data_acquisition.ipynb
 │   ├── 02_eda.ipynb
 │   ├── 03_feature_engineering.ipynb
 │   └── 04_model_experiments.ipynb
-├── tests/             # Pytest unit tests
-├── train.py           # Training script for automation
-├── predict.py         # Inference script for end-users
-└── requirements.txt   # Pinned dependencies
-`
+├── tests/                      # Pytest unit tests
+├── train.py                    # Training script for automation
+├── predict.py                  # Inference script for end users
+└── requirements.txt            # Pinned dependencies
+
+
+```
 
 ## How to Run Locally
 
