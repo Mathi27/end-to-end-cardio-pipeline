@@ -44,3 +44,11 @@ jobs:
     - name: Run Unit Tests
       run: |
         pytest tests/
+        
+    # 7. Upload MLflow Artifacts (The Final Requirement)
+    - name: Upload Artifacts
+      if: always()  # Run this even if tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: mlflow-logs
+        path: mlruns/
