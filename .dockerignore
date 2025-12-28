@@ -1,0 +1,8 @@
+pycache
+.git
+.github
+tests
+venv
+env
+*.pyc
+*.DS_Store
