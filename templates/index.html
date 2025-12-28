@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardio-AI Assistant | Heart Disease Risk Prediction</title>
+    <!-- Tailwind CSS for rapid, beautiful styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for the Gauge -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* Custom Gauge Needle Animation */
+        .gauge-container { position: relative; width: 100%; height: 200px; }
+        .risk-badge-high { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .risk-badge-low { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="min-h-screen flex flex-col md:flex-row">
+        
+        <!-- SIDEBAR / INPUT FORM -->
+        <div class="w-full md:w-1/3 bg-white border-r border-gray-200 p-6 overflow-y-auto h-screen">
+            <div class="mb-4 flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-heart-pulse fa-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Cardio-AI</h1>
+                    <p class="text-sm text-gray-500">Clinical Decision Support System</p>
+                </div>
+            </div>
+
+            <!-- SCENARIO BUTTONS -->
+            <div class="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Quick Scenarios</p>
+                <div class="flex gap-2">
+                    <button onclick="loadScenario('high')" class="flex-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 py-2 px-3 rounded-md font-medium transition-colors">
+                        High Risk
+                    </button>
+                    <button onclick="loadScenario('medium')" class="flex-1 text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-700 py-2 px-3 rounded-md font-medium transition-colors">
+                        Medium
+                    </button>
+                    <button onclick="loadScenario('low')" class="flex-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 py-2 px-3 rounded-md font-medium transition-colors">
+                        Low Risk
+                    </button>
+                </div>
+            </div>
+
+            <form id="predictionForm" class="space-y-4">
+                
+                <!-- Section 1: Demographics -->
+                <div class="pb-4 border-b border-gray-100">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Demographics</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                            <input type="number" id="age" name="age" value="60" class="w-full rounded-lg border-gray-300 border p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 form-input" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sex</label>
+                            <select id="sex" name="sex" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Vitals -->
+                <div class="pb-4 border-b border-gray-100">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Vitals</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Resting BP (mm Hg)</label>
+                            <input type="number" id="trestbps" name="trestbps" value="130" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cholesterol (mg/dl)</label>
+                            <input type="number" id="chol" name="chol" value="250" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Heart Rate</label>
+                            <input type="number" id="thalach" name="thalach" value="150" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fasting BS > 120</label>
+                            <select id="fbs" name="fbs" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                                <option value="0">False</option>
+                                <option value="1">True</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Clinical Signs -->
+                <div class="pb-4">
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Clinical Indicators</h3>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Chest Pain Type</label>
+                            <select id="cp" name="cp" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                                <option value="1">Typical Angina</option>
+                                <option value="2">Atypical Angina</option>
+                                <option value="3">Non-anginal Pain</option>
+                                <option value="4" selected>Asymptomatic (High Risk)</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ex. Angina</label>
+                                <select id="exang" name="exang" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ST Depression</label>
+                                <input type="number" step="0.1" id="oldpeak" name="oldpeak" value="1.0" class="w-full rounded-lg border-gray-300 border p-2 text-sm form-input">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Slope</label>
+                                <select id="slope" name="slope" class="w-full rounded-lg border-gray-300 border p-2 text-xs form-input">
+                                    <option value="1">Up</option>
+                                    <option value="2" selected>Flat</option>
+                                    <option value="3">Down</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Major Vessels</label>
+                                <select id="ca" name="ca" class="w-full rounded-lg border-gray-300 border p-2 text-xs form-input">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Thal</label>
+                                <select id="thal" name="thal" class="w-full rounded-lg border-gray-300 border p-2 text-xs form-input">
+                                    <option value="3">Normal</option>
+                                    <option value="6">Fixed</option>
+                                    <option value="7" selected>Reversable</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Hidden field for restecg default -->
+                        <input type="hidden" name="restecg" value="0">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition hover:scale-105 flex justify-center items-center gap-2">
+                    <span>Analyze Risk</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- MAIN DASHBOARD / RESULTS -->
+        <div class="w-full md:w-2/3 p-8 flex flex-col items-center justify-center relative bg-slate-50">
+            
+            <!-- Default State / Loading -->
+            <div id="welcomeState" class="text-center max-w-md">
+                <div class="bg-white p-6 rounded-full inline-block mb-6 shadow-sm">
+                    <i class="fa-solid fa-user-doctor text-6xl text-blue-200"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Ready to Analyze</h2>
+                <p class="text-gray-500">Select a scenario from the sidebar or manually enter vitals to generate a real-time AI prediction.</p>
+            </div>
+
+            <!-- Result State (Hidden by default) -->
+            <div id="resultState" class="w-full max-w-3xl hidden fade-in">
+                
+                <!-- Header Status -->
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Analysis Report</h2>
+                        <p class="text-sm text-gray-500">Patient ID: #AUTO-GEN</p>
+                    </div>
+                    <div id="statusBadge" class="px-6 py-2 rounded-full font-bold text-lg flex items-center gap-2">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    
+                    <!-- Gauge Card -->
+                    <div class="glass-panel p-6 flex flex-col items-center justify-center">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase mb-4">Risk Probability</h3>
+                        <div class="relative w-64 h-32">
+                            <canvas id="riskGauge"></canvas>
+                            <div class="absolute bottom-0 left-0 w-full text-center">
+                                <span id="probabilityText" class="text-4xl font-bold text-gray-800">0%</span>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-sm text-gray-500 text-center">Model Confidence based on 13 factors</p>
+                    </div>
+
+                    <!-- Key Contributors (Mocked for visual, can be linked to SHAP later) -->
+                    <div class="glass-panel p-6">
+                        <h3 class="text-sm font-semibold text-gray-400 uppercase mb-4">Primary Risk Factors</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-lungs text-red-400"></i>
+                                    <span class="text-sm font-medium text-gray-700">Chest Pain Type</span>
+                                </div>
+                                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">High Impact</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-heart-crack text-orange-400"></i>
+                                    <span class="text-sm font-medium text-gray-700">Max Heart Rate</span>
+                                </div>
+                                <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">Medium Impact</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-droplet text-yellow-400"></i>
+                                    <span class="text-sm font-medium text-gray-700">Cholesterol</span>
+                                </div>
+                                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">General</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="glass-panel p-6 border-l-4 border-blue-500">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-blue-500"></i>
+                        AI Recommendations
+                    </h3>
+                    <div id="recommendationText" class="text-gray-600 text-sm leading-relaxed space-y-2">
+                        <!-- Filled via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- SCENARIO DATA PRESETS ---
+        const scenarios = {
+            'high': {
+                'age': 63, 'sex': 1, 'cp': 4, 'trestbps': 145, 'chol': 233, 
+                'fbs': 1, 'thalach': 150, 'exang': 0, 'oldpeak': 2.3, 
+                'slope': 3, 'ca': 0, 'thal': 6
+            },
+            'medium': {
+                'age': 57, 'sex': 1, 'cp': 4, 'trestbps': 130, 'chol': 131, 
+                'fbs': 0, 'thalach': 115, 'exang': 1, 'oldpeak': 1.2, 
+                'slope': 2, 'ca': 1, 'thal': 7
+            },
+            'low': {
+                'age': 41, 'sex': 0, 'cp': 2, 'trestbps': 130, 'chol': 204, 
+                'fbs': 0, 'thalach': 172, 'exang': 0, 'oldpeak': 0.0, 
+                'slope': 1, 'ca': 0, 'thal': 3
+            }
+        };
+
+        function loadScenario(type) {
+            const data = scenarios[type];
+            for (const [key, value] of Object.entries(data)) {
+                const input = document.getElementById(key);
+                if (input) input.value = value;
+            }
+            
+            // Auto-submit for instant gratification
+            // document.getElementById('predictionForm').requestSubmit(); 
+            // Or just highlight the button to encourage clicking
+            const btn = document.querySelector('button[type="submit"]');
+            btn.classList.add('ring-4', 'ring-blue-300');
+            setTimeout(() => btn.classList.remove('ring-4', 'ring-blue-300'), 500);
+        }
+
+        // --- 1. Gauge Chart Setup ---
+        const ctx = document.getElementById('riskGauge').getContext('2d');
+        let riskChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Risk', 'Safe'],
+                datasets: [{
+                    data: [0, 100], // Initial state
+                    backgroundColor: ['#e5e7eb', '#e5e7eb'],
+                    borderWidth: 0,
+                    circumference: 180,
+                    rotation: 270,
+                    cutout: '75%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { tooltip: { enabled: false }, legend: { display: false } },
+                animation: { animateScale: true, animateRotate: true }
+            }
+        });
+
+        // --- 2. Form Handling ---
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect Data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Convert types (API expects numbers)
+            for (let key in data) {
+                data[key] = parseFloat(data[key]);
+            }
+
+            // UI Loading State
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            try {
+                // Call API
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+
+                // --- 3. Update UI ---
+                document.getElementById('welcomeState').classList.add('hidden');
+                const resultDiv = document.getElementById('resultState');
+                resultDiv.classList.remove('hidden');
+                
+                // Update Gauge Data
+                const riskScore = result.risk_score * 100;
+                let color = riskScore > 50 ? '#ef4444' : '#22c55e'; // Red if high, Green if low
+                
+                riskChart.data.datasets[0].data = [riskScore, 100 - riskScore];
+                riskChart.data.datasets[0].backgroundColor = [color, '#e5e7eb'];
+                riskChart.update();
+
+                // Update Text
+                document.getElementById('probabilityText').textContent = riskScore.toFixed(1) + '%';
+                document.getElementById('probabilityText').style.color = color;
+
+                // Update Badge
+                const badge = document.getElementById('statusBadge');
+                if (result.prediction === 1) {
+                    badge.className = "px-6 py-2 rounded-full font-bold text-lg flex items-center gap-2 bg-red-100 text-red-700 border border-red-200";
+                    badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> HIGH RISK DETECTED';
+                    generateRecommendations(true, data);
+                } else {
+                    badge.className = "px-6 py-2 rounded-full font-bold text-lg flex items-center gap-2 bg-green-100 text-green-700 border border-green-200";
+                    badge.innerHTML = '<i class="fa-solid fa-shield-heart"></i> PATIENT HEALTHY';
+                    generateRecommendations(false, data);
+                }
+
+            } catch (error) {
+                alert("Error connecting to API: " + error);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // --- 4. Dynamic Recommendations ---
+        function generateRecommendations(isHighRisk, data) {
+            const container = document.getElementById('recommendationText');
+            let html = '';
+
+            if (isHighRisk) {
+                html += '<p class="font-semibold text-red-600">⚠️ Immediate Clinical Attention Recommended.</p>';
+                html += '<ul class="list-disc pl-5 space-y-1">';
+                if (data.cp === 4) html += '<li>Patient reports <b>Asymptomatic</b> chest pain, which is a strong silent indicator. Conduct Angiography.</li>';
+                if (data.thalach < 130) html += '<li>Max Heart Rate is dangerously low during exertion. Evaluate for chronotropic incompetence.</li>';
+                if (data.oldpeak > 2.0) html += '<li>Significant ST Depression observed. Indicates potential myocardial ischemia.</li>';
+                html += '</ul>';
+            } else {
+                html += '<p class="font-semibold text-green-600">✅ No immediate cardiac interventions required.</p>';
+                html += '<ul class="list-disc pl-5 space-y-1">';
+                html += '<li>Continue routine monitoring.</li>';
+                if (data.chol > 240) html += '<li><b>Note:</b> Cholesterol is borderline high. Recommend dietary changes.</li>';
+                html += '</ul>';
+            }
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

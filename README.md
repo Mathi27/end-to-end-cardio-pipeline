@@ -96,4 +96,8 @@ Max Heart Rate (thalach): Shows a strong negative correlation. Patients unable t
 ST Depression (oldpeak): A critical EKG marker indicating oxygen deprivation during exercise.
 
 
-AUTHOR : MATHI YUVARAJAN T.K
+## Web Dashboard
+
+| High Risk Patient | Low Risk Patient |
+|------------------|-----------------|
+| <img src="img/high_risk_patient_img.png" width="300"/> | <img src="img/low_risk_patient_img.png" width="300"/> |
