@@ -100,4 +100,4 @@ ST Depression (oldpeak): A critical EKG marker indicating oxygen deprivation dur
 
 | High Risk Patient | Low Risk Patient |
 |------------------|-----------------|
-| <img src="img/high_risk_patient_img.png" width="300"/> | <img src="img/low_risk_patient_img.png" width="300"/> |
+| <img src="img/high_risk_patient_img.png" width="350"/> | <img src="img/low_risk_patient_img.png" width="350"/> |
